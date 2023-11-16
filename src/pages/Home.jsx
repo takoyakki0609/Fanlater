@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import dummy from "../shared/fakeData.json";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import uuid from "react-uuid";
 import { isVisible } from "@testing-library/user-event/dist/utils";
 
@@ -70,13 +69,16 @@ const Users = styled.li`
   }
 `;
 
-export default function Home() {
+export default function Home({ data, setData }) {
   const navigate = useNavigate();
 
-  //항상 한번 바꾸면 하ㄴ번 테스트 하기
-  const [data, setData] = useState(dummy);
-  const [viewData, setViewData] = useState(dummy);
-  const [color, setColor] = useState(false);
+  const [name, setName] = useState("all");
+  const viewData = data.filter((data) => {
+    if (name === "all") {
+      return true;
+    }
+    return data.writedTo === name;
+  });
   const [nickname, setNickname] = useState("");
   const [content, setContent] = useState("");
   const [seleted, setSeleted] = useState("");
@@ -85,16 +87,14 @@ export default function Home() {
     e.preventDefault();
     const newArr = {
       id: uuid(),
-      createdAt: new Date().toString(),
+      createdAt: new Date().getTime(),
       nickname: nickname,
       avatar:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRaMLq7qLjd3tJE_MxbQzSk5BGng5SXecU82AVzphYuloDHl-cVyTYOiLiGRwDF9jZ1Fig&usqp=CAU",
       content: content,
       writedTo: seleted,
     };
-    setData((prev) => {
-      return [...prev, newArr];
-    });
+    setData([...data, newArr]);
   };
 
   const onChangeNickname = (e) => {
@@ -108,26 +108,10 @@ export default function Home() {
     console.log(onChangeSeleted);
   };
 
-/*   const onClicknongdamgom = () => {
-    const newArr = data;
-    const viewArr = newArr.filter((item)=>item.writedTo === "농담곰")
-    setViewData(viewArr)
 
-  };
-  const onClickKoroke = () =>{
-    const newArr = data;
-    const viewArr = newArr.filter((item)=>item.writedTo === "두더지 고로케")
-    setViewData(viewArr)
-  } */
   const onClickFilter = (name) => {
-    const newArr = data;
-    const viewArr = newArr.filter((item)=>item.writedTo === name)
-    setViewData(viewArr)
-    if(name === 'all'){
-      setViewData(newArr)
-    }
-  }
-  
+      setName(name)
+  };
 
   return (
     <Container>
@@ -135,13 +119,19 @@ export default function Home() {
         <Title>농담곰 팬레터</Title>
         <div>
           {/* writedTo가 같으면 보여주고 아니면 안보여주기.. ? */}
-          <button style={style} onClick={()=>onClickFilter('all')}>전체보기</button>
-          <button style={style} onClick={()=>onClickFilter('농담곰')}>
+          <button style={style} onClick={() => onClickFilter("all")}>
+            전체보기
+          </button>
+          <button style={style} onClick={() => onClickFilter("농담곰")}>
             농담곰
           </button>
 
-          <button style={style} onClick={()=>onClickFilter('두더지 고로케')}>두더지 고로케</button>
-          <button style={style} onClick={()=>onClickFilter('퍼그씨')}>퍼그씨</button>
+          <button style={style} onClick={() => onClickFilter("두더지 고로케")}>
+            두더지 고로케
+          </button>
+          <button style={style} onClick={() => onClickFilter("퍼그씨")}>
+            퍼그씨
+          </button>
         </div>
       </TitleBox>
 
@@ -189,7 +179,7 @@ export default function Home() {
         </div>
       </Form>
       <div>
-        <UserList>
+        {viewData === true ? '팬레터가 없습니다.' : <UserList>
           {viewData.map((item) => {
             return (
               <Users key={item.id}>
@@ -230,7 +220,8 @@ export default function Home() {
               </Users>
             );
           })}
-        </UserList>
+        </UserList>}
+        
       </div>
     </Container>
   );

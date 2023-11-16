@@ -12,26 +12,33 @@ const FanlaterBox = styled.section`
   min-height: 500px;
 `;
 
-const Detail = () => {
+const Detail = ({ data, setData }) => {
+  
   const [edit, setEdit] = useState(false); // 수정에 관한 state
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
   console.log(params);
-  console.log(location);
-
-  const foundData = location.state.find((item) => {
+  console.log(location.state);
+  console.log(data);
+  const foundData = data.find((item) => {
     return item.id == params.id;
   });
-
+  console.log(foundData)
   const [editContent, setEditContent] = useState(foundData.content);
+
   const onClickDelete = (id) => {
-    //삭제 클릭시 삭제하겠냐는 alret띄움, 삭제 뒤 홈으로 이동
-    let answer = window.confirm("삭제하시겠습니까?");
-    if (answer === true) {
-      alert("삭제되었습니다.");
+    if(window.confirm('삭제하시겠습니까?')){
+      const deletedData = data.filter((item)=>{
+        return item.id !== id
+      });
+      navigate('/')
+      setData(deletedData)
+    }else{
+      return false
     }
-    window.location.href="/"
+    ;
+    
   };
 
   return (
@@ -46,7 +53,13 @@ const Detail = () => {
       </button>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <FanlaterBox>
-          <div style={{ display: "flex", alignItems: "center", justifyContent:'space-around' }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-around",
+            }}
+          >
             <figure>
               <img
                 src={foundData.avatar}
