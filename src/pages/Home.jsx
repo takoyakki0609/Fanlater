@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import uuid from "react-uuid";
-import { isVisible } from "@testing-library/user-event/dist/utils";
 
 //버튼스타일
-const style = {
-  border: "none",
-  padding: "10px",
-  margin: "10px",
-  cursor: "pointer",
-  background: !isVisible ? "yellow" : "transparent",
-};
+
+const Button = styled.button`
+  border: none;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  background: ${(props) => (props.name === props.children ? "#f3b664" : "white")};
+
+  &:hover {
+    background-color: #f3b664;
+  }
+`;
 
 const Container = styled.div`
   margin: 0 auto;
@@ -79,6 +84,7 @@ export default function Home({ data, setData }) {
     }
     return data.writedTo === name;
   });
+  
   const [nickname, setNickname] = useState("");
   const [content, setContent] = useState("");
   const [seleted, setSeleted] = useState("");
@@ -105,33 +111,25 @@ export default function Home({ data, setData }) {
   };
   const onChangeSeleted = (e) => {
     setSeleted(e.target.value);
-    console.log(onChangeSeleted);
   };
-
 
   const onClickFilter = (name) => {
-      setName(name)
+    setName(name);
   };
+  const buttonName = ["all", "농담곰", "두더지 고로케", "퍼그씨"];
 
   return (
     <Container>
       <TitleBox>
         <Title>농담곰 팬레터</Title>
-        <div>
-          {/* writedTo가 같으면 보여주고 아니면 안보여주기.. ? */}
-          <button style={style} onClick={() => onClickFilter("all")}>
-            전체보기
-          </button>
-          <button style={style} onClick={() => onClickFilter("농담곰")}>
-            농담곰
-          </button>
-
-          <button style={style} onClick={() => onClickFilter("두더지 고로케")}>
-            두더지 고로케
-          </button>
-          <button style={style} onClick={() => onClickFilter("퍼그씨")}>
-            퍼그씨
-          </button>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {buttonName.map((item) => {
+            return (
+              <div key={item}>
+                <Button name={name} onClick={() => onClickFilter(item)}>{item}</Button>
+              </div>
+            );
+          })}
         </div>
       </TitleBox>
 
@@ -179,49 +177,52 @@ export default function Home({ data, setData }) {
         </div>
       </Form>
       <div>
-        {viewData === true ? '팬레터가 없습니다.' : <UserList>
-          {viewData.map((item) => {
-            return (
-              <Users key={item.id}>
-                {/* <Link to={`/detail/${item.id}`} style={{textDecoration:'none',color:'white'}}> */}
-                <div
-                  onClick={() => {
-                    //1.경로 2.인자
-                    navigate(`/detail/${item.id}`, { state: viewData });
-                  }}
-                >
-                  <section style={{ display: "flex", alignItems: "center" }}>
-                    <figure style={{ width: "100px" }}>
-                      <img
-                        src={item.avatar}
-                        alt="유저아바타"
-                        style={{ borderRadius: "50%", width: "50%" }}
-                      />
-                    </figure>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <span>{item.createdAt}</span>
-                      <span>{item.nickname}</span>
+        {viewData.length > 0 ? (
+          <UserList>
+            {viewData.map((item) => {
+              return (
+                <Users key={item.id}>
+                  {/* <Link to={`/detail/${item.id}`} style={{textDecoration:'none',color:'white'}}> */}
+                  <div
+                    onClick={() => {
+                      //1.경로 2.인자
+                      navigate(`/detail/${item.id}`, { state: viewData });
+                    }}
+                  >
+                    <section style={{ display: "flex", alignItems: "center" }}>
+                      <figure style={{ width: "100px" }}>
+                        <img
+                          src={item.avatar}
+                          alt="유저아바타"
+                          style={{ borderRadius: "50%", width: "50%" }}
+                        />
+                      </figure>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <span>{item.createdAt}</span>
+                        <span>{item.nickname}</span>
+                      </div>
+                    </section>
+                    <div>
+                      <p
+                        style={{
+                          marginLeft: "90px",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.content}
+                      </p>
                     </div>
-                  </section>
-                  <div>
-                    <p
-                      style={{
-                        marginLeft: "90px",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {item.content}
-                    </p>
                   </div>
-                </div>
-                {/* </Link> */}
-              </Users>
-            );
-          })}
-        </UserList>}
-        
+                  {/* </Link> */}
+                </Users>
+              );
+            })}
+          </UserList>
+        ) : (
+          <div>팬레터가 아직 없습니다</div>
+        )}
       </div>
     </Container>
   );
