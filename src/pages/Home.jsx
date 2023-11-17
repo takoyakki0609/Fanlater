@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import uuid from "react-uuid";
+import { FanlaterContext } from "context/FanlaterContext";
 
 //버튼스타일
 
@@ -11,7 +12,8 @@ const Button = styled.button`
   margin: 10px;
   border-radius: 20px;
   cursor: pointer;
-  background: ${(props) => (props.name === props.children ? "#f3b664" : "white")};
+  background: ${(props) =>
+    props.name === props.children ? "#f3b664" : "white"};
 
   &:hover {
     background-color: #f3b664;
@@ -74,17 +76,18 @@ const Users = styled.li`
   }
 `;
 
-export default function Home({ data, setData }) {
+export default function Home() {
   const navigate = useNavigate();
-
+  const dataList = useContext(FanlaterContext)
+  console.log(dataList)
   const [name, setName] = useState("all");
-  const viewData = data.filter((data) => {
+  const viewData = dataList.data.filter((data) => {
     if (name === "all") {
       return true;
     }
     return data.writedTo === name;
   });
-  
+
   const [nickname, setNickname] = useState("");
   const [content, setContent] = useState("");
   const [seleted, setSeleted] = useState("");
@@ -100,7 +103,7 @@ export default function Home({ data, setData }) {
       content: content,
       writedTo: seleted,
     };
-    setData([...data, newArr]);
+    dataList.setData([...dataList.data, newArr]);
   };
 
   const onChangeNickname = (e) => {
@@ -118,112 +121,122 @@ export default function Home({ data, setData }) {
   };
   const buttonName = ["all", "농담곰", "두더지 고로케", "퍼그씨"];
 
-  return (
-    <Container>
-      <TitleBox>
-        <Title>농담곰 팬레터</Title>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          {buttonName.map((item) => {
-            return (
-              <div key={item}>
-                <Button name={name} onClick={() => onClickFilter(item)}>{item}</Button>
-              </div>
-            );
-          })}
-        </div>
-      </TitleBox>
 
-      <Form onSubmit={enrollHandler}>
-        {/* 닉네임 */}
-        <SectionBox>
-          <Label>닉네임:</Label>
-          <input
-            type="text"
-            value={nickname}
-            onChange={(e) => onChangeNickname(e)}
-            placeholder="최대 20글자까지 작성할 수 있습니다"
-            maxLength="20"
-            style={{ width: "100%", padding: "5px 10px" }}
-          />
-        </SectionBox>
-        {/* 내용 */}
-        <SectionBox>
-          <Label>내용:</Label>
-          <textarea
-            type="text"
-            placeholder="최대 100자까지만 작성할 수 있습니다."
-            maxLength="100"
-            value={content}
-            onChange={(e) => onChangeContent(e)}
-            style={{
-              width: "100%",
-              height: "80px",
-              padding: "5px 10px",
-            }}
-          />
-        </SectionBox>
-        <SectionBox>
-          <label>
-            누구에게 보내실 건가요?&nbsp;
-            <select value={seleted} onChange={onChangeSeleted}>
-              <option value="농담곰">농담곰</option>
-              <option value="두더지 고로케">두더지 고로케</option>
-              <option value="퍼그씨">퍼그씨</option>
-            </select>
-          </label>
-        </SectionBox>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <button>팬레터 등록</button>
-        </div>
-      </Form>
-      <div>
-        {viewData.length > 0 ? (
-          <UserList>
-            {viewData.map((item) => {
+  console.log(dataList)
+  return (
+    
+      <Container>
+        <TitleBox>
+          <Title>농담곰 팬레터</Title>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            {buttonName.map((item) => {
               return (
-                <Users key={item.id}>
-                  {/* <Link to={`/detail/${item.id}`} style={{textDecoration:'none',color:'white'}}> */}
-                  <div
-                    onClick={() => {
-                      //1.경로 2.인자
-                      navigate(`/detail/${item.id}`, { state: viewData });
-                    }}
-                  >
-                    <section style={{ display: "flex", alignItems: "center" }}>
-                      <figure style={{ width: "100px" }}>
-                        <img
-                          src={item.avatar}
-                          alt="유저아바타"
-                          style={{ borderRadius: "50%", width: "50%" }}
-                        />
-                      </figure>
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span>{item.createdAt}</span>
-                        <span>{item.nickname}</span>
-                      </div>
-                    </section>
-                    <div>
-                      <p
-                        style={{
-                          marginLeft: "90px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {item.content}
-                      </p>
-                    </div>
-                  </div>
-                  {/* </Link> */}
-                </Users>
+                <div key={item}>
+                  <Button name={name} onClick={() => onClickFilter(item)}>
+                    {item}
+                  </Button>
+                </div>
               );
             })}
-          </UserList>
-        ) : (
-          <div>팬레터가 아직 없습니다</div>
-        )}
-      </div>
-    </Container>
+          </div>
+        </TitleBox>
+
+        <Form onSubmit={enrollHandler}>
+          {/* 닉네임 */}
+          <SectionBox>
+            <Label>닉네임:</Label>
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => onChangeNickname(e)}
+              placeholder="최대 20글자까지 작성할 수 있습니다"
+              maxLength="20"
+              style={{ width: "100%", padding: "5px 10px" }}
+            />
+          </SectionBox>
+          {/* 내용 */}
+          <SectionBox>
+            <Label>내용:</Label>
+            <textarea
+              type="text"
+              placeholder="최대 100자까지만 작성할 수 있습니다."
+              maxLength="100"
+              value={content}
+              onChange={(e) => onChangeContent(e)}
+              style={{
+                width: "100%",
+                height: "80px",
+                padding: "5px 10px",
+              }}
+            />
+          </SectionBox>
+          <SectionBox>
+            <label>
+              누구에게 보내실 건가요?&nbsp;
+              <select value={seleted} onChange={onChangeSeleted}>
+                <option value="농담곰">농담곰</option>
+                <option value="두더지 고로케">두더지 고로케</option>
+                <option value="퍼그씨">퍼그씨</option>
+              </select>
+            </label>
+          </SectionBox>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button>팬레터 등록</button>
+          </div>
+        </Form>
+        <div>
+          {viewData.length > 0 ? (
+            <UserList>
+              {viewData.map((item) => {
+                return (
+                  <Users key={item.id}>
+                    {/* <Link to={`/detail/${item.id}`} style={{textDecoration:'none',color:'white'}}> */}
+                    <div
+                      onClick={() => {
+                        //1.경로 2.인자
+                        navigate(`/detail/${item.id}`, { state: viewData });
+                      }}
+                    >
+                      <section
+                        style={{ display: "flex", alignItems: "center" }}
+                      >
+                        <figure style={{ width: "100px" }}>
+                          <img
+                            src={item.avatar}
+                            alt="유저아바타"
+                            style={{ borderRadius: "50%", width: "50%" }}
+                          />
+                        </figure>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          <span>{item.createdAt}</span>
+                          <span>{item.nickname}</span>
+                        </div>
+                      </section>
+                      <div>
+                        <p
+                          style={{
+                            marginLeft: "90px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.content}
+                        </p>
+                      </div>
+                    </div>
+                    {/* </Link> */}
+                  </Users>
+                );
+              })}
+            </UserList>
+          ) : (
+            <div>팬레터가 아직 없습니다</div>
+          )}
+        </div>
+      </Container>
+    
   );
 }

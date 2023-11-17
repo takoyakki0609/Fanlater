@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { FanlaterContext } from "context/FanlaterContext";
+import React, { useContext, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import styled from "styled-components";
 
@@ -12,35 +13,38 @@ const FanlaterBox = styled.section`
   min-height: 500px;
 `;
 
-const Detail = ({ data, setData }) => {
-  
+const Detail = () => {
   const [edit, setEdit] = useState(false); // 수정에 관한 state
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
   console.log(params);
   console.log(location.state);
-  console.log(data);
-  const foundData = data.find((item) => {
-    return item.id == params.id;
-  });
-  console.log(foundData)
+
+  const dataList = useContext(FanlaterContext);
+  console.log(dataList);
+
+   const foundData = dataList.data.find((item) => {
+    return item.id === params.id;
+  }); 
   const [editContent, setEditContent] = useState(foundData.content);
 
   const onClickDelete = (id) => {
-    if(window.confirm('삭제하시겠습니까?')){
-      const deletedData = data.filter((item)=>{
-        return item.id !== id
+    if (window.confirm("삭제하시겠습니까?")) {
+      const deletedData = dataList.data.filter((item) => {
+        console.log(item)
+        console.log(id)
+        return item.id !== id;
       });
-      navigate('/')
-      setData(deletedData)
-    }else{
-      return false
-    }
-    ;
-    
+      
+      dataList.setData(deletedData);
+      navigate("/");
+      
+    } else {
+      return false;
+    }   
   };
-
+  
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <button
