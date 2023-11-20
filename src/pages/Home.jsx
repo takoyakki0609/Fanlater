@@ -1,29 +1,41 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import dummy from "../shared/fakeData.json";
-import { Link, useNavigate } from "react-router-dom";
-import uuid from "react-uuid";
+import { useNavigate } from "react-router-dom";
+
+import { useDispatch, useSelector } from "react-redux";
 
 
 //버튼스타일
-const style = {
-  "border": "none",
-  "padding": '10px',
-  "margin":'10px',
-  "cursor":"pointer",
-  "background":"white"
-}
+const Button = styled.button`
+  border: none;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  background: ${(props) =>
+    props.name === props.children ? "#f3b664" : "white"};
+
+  &:hover {
+    background-color: #f3b664;
+  }
+`;
 
 const Container = styled.div`
   margin: 0 auto;
   max-width: 1200px;
   text-align: center;
-  background: url(../assets/nongdamgom.png);
 `;
-
+const TitleBox = styled.div`
+  background: url("https://github.com/takoyakki0609/Fanlater/blob/main/src/assets/nongdamgom.png?raw=true");
+  background-size: cover;
+  width: 100%;
+  height: 500px;
+`;
 const Title = styled.h1`
   font-size: 30px;
-  margin-top: 50px;
+  font-weight: bold;
+  text-shadow: -1px 0px white, 0px 1px white, 1px 0px white, 0px -1px white;
+  padding-top: 200px;
 `;
 
 const Form = styled.form`
@@ -67,24 +79,35 @@ const Users = styled.li`
 export default function Home() {
   const navigate = useNavigate();
 
+  const Fanletter = useSelector((state)=>{
+      return state.Fanletter.allComent;
+  })
+
+  console.log(Fanletter)
   //항상 한번 바꾸면 하ㄴ번 테스트 하기
-  const [data, setData] = useState(dummy)
+  // const [data, setData] = useState(dummy)
+  const dispatch = useDispatch()
   const [nickname, setNickname] = useState('')
   const [content, setContent] =useState('')
   const [seleted, setSeleted] = useState("")
+  const [name, setName] = useState("all");
+  const viewData = Fanletter.filter((data) => {
+    if (name === "all") {
+      return true;
+    }
+    return data.writedTo === name;
+  });
+
+
 
   const enrollHandler = (e) => {
     e.preventDefault();
-    const newArr = {
-      id:uuid(),
-      createdAt:new Date().toString(),
-      nickname:nickname,
-      avatar:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRaMLq7qLjd3tJE_MxbQzSk5BGng5SXecU82AVzphYuloDHl-cVyTYOiLiGRwDF9jZ1Fig&usqp=CAU",
-      content:content,
-      writedTo:seleted
-    }
-    setData((prev)=>{return [...prev, newArr]})
+    dispatch({
+      type: "ADD_FANLETTER",
+      payload:{nickname, content, seleted}
+    })
   }
+
 
   const onChangeNickname = (e) => {
     setNickname(e.target.value)
@@ -97,20 +120,28 @@ export default function Home() {
     console.log(onChangeSeleted)
   }
  
+  const onClickFilter = (name) => {
+    setName(name);
+  };
+  const buttonName = ["all", "농담곰", "두더지 고로케", "퍼그씨"];
 
 
   return (
     <Container>
-      <div>
-        <Title>농담곰 팬레터 콜렉션</Title>
-        <div>
-            <button style={style}>전체보기</button>
-            <button style={style}>농담곰</button>
-            <button style={style}>두더지 고로케</button>
-            <button style={style}>퍼그씨</button>
-        </div>
-      </div>
-
+      <TitleBox>
+          <Title>농담곰 팬레터</Title>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            {buttonName.map((item) => {
+              return (
+                <div key={item}>
+                  <Button name={name} onClick={() => onClickFilter(item)}>
+                    {item}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </TitleBox>
       <Form onSubmit={enrollHandler}>
         {/* 닉네임 */}
         <SectionBox>
@@ -155,46 +186,56 @@ export default function Home() {
         </div>
       </Form>
       <div>
-        <UserList>
-          {data.map((item) => {
-            return (
-              <Users key={item.id}>
-                {/* <Link to={`/detail/${item.id}`} style={{textDecoration:'none',color:'white'}}> */}
-                <div onClick={()=>{
-                  //1.경로 2.인자
-                  navigate(`/detail/${item.id}`, { state: data })
-                }}>
-                  <section style={{ display: "flex", alignItems: "center" }}>
-                    <figure style={{width:'100px'}}>
-                      <img
-                        src={item.avatar}
-                        alt="유저아바타"
-                        style={{ borderRadius: "50%", width: "50%" }}
-                      />
-                    </figure>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <span>{item.createdAt}</span>
-                      <span>{item.nickname}</span>
-                    </div>
-                  </section>
-                  <div>
-                    <p
-                      style={{
-                        marginLeft: "90px",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+       {viewData.length > 0 ? (
+            <UserList>
+              {viewData.map((item) => {
+                return (
+                  <Users key={item.id}>
+                    {/* <Link to={`/detail/${item.id}`} style={{textDecoration:'none',color:'white'}}> */}
+                    <div
+                      onClick={() => {
+                        //1.경로 2.인자
+                        navigate(`/detail/${item.id}`, { state: viewData });
                       }}
                     >
-                      {item.content}
-                    </p>
-                  </div>
-                </div>
-                {/* </Link> */}
-              </Users>
-            );
-          })}
-        </UserList>
+                      <section
+                        style={{ display: "flex", alignItems: "center" }}
+                      >
+                        <figure style={{ width: "100px" }}>
+                          <img
+                            src={item.avatar}
+                            alt="유저아바타"
+                            style={{ borderRadius: "50%", width: "50%" }}
+                          />
+                        </figure>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          <span>{item.createdAt}</span>
+                          <span>{item.nickname}</span>
+                        </div>
+                      </section>
+                      <div>
+                        <p
+                          style={{
+                            marginLeft: "90px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.content}
+                        </p>
+                      </div>
+                    </div>
+                    {/* </Link> */}
+                  </Users>
+                );
+              })}
+            </UserList>
+          ) : (
+            <div>팬레터가 아직 없습니다</div>
+          )}
       </div>
     </Container>
   );

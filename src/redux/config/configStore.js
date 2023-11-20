@@ -1,7 +1,10 @@
-import { createStore } from "redux";
-import { CombinedState } from "redux";
+import { combineReducers, createStore } from "redux";
 
-const rootReducer = CombinedState({})
+import Fanletter from "redux/modules/Fanletter";
+
+const rootReducer = combineReducers({
+    Fanletter,
+})
 const store = createStore(rootReducer)
 
 export default store
